@@ -26,12 +26,15 @@
 
     <body class="p-3">
         <div class="container-fluid">
-            <div class="ldBar label-center" 
+            <div id="progressBar"
+                 class="ldBar label-center" 
                  data-stroke="red" 
                  data-preset="circle" 
                  data-value="0" 
                  data-min="0" 
-                 data-max="100">
+                 data-max="100"
+                 data-duration="0.9"
+                 data-precision="0.0001">
             </div>
         </div>
 
@@ -44,7 +47,16 @@
 
         <!-- actual pomodoro timer logic -->
         <script>
-            // object is ldBar
+            let progressBar = null;
+            
+            // we have to wait for the page to load otherwise the `.ldBar` property won't have been created yet
+            window.onload = () => {
+                progressBar = document.getElementById("progressBar").ldBar;
+                
+                // setInterval(() => {
+                //     progressBar.set(progressBar.value + 1.0);
+                // }, 1000);
+            }
         </script>
     </body>
 </html>
