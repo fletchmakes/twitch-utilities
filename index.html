@@ -16,19 +16,24 @@
         background-color: transparent;
         margin: 0px;
         padding: 0px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: fit-content;
     }
 
     .timer {
         color: transparent;
         font-family: 'Roboto', sans-serif;
-        font-size: xx-large;
+        font-size: 5em;
+        text-align: center;
     }
 
     .box {
         background-color: transparent;
-        padding: 15px;
-        display: inline-block;
-        border-radius: 12px;
+        border-radius: 20px;
+        padding: 20px;
     }
 </style>
 
@@ -74,8 +79,8 @@
             }, 1000);
 
             // make timer visible
-            display.style.color = '#02343F';
-            displayContainer.style.backgroundColor = '#F0EDCC'
+            display.style.color = config.textColor;
+            displayContainer.style.backgroundColor = config.backgroundColor;
         };
 
         const resetTimer = () => {
