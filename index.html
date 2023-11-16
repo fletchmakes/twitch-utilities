@@ -1,62 +1,110 @@
 <!DOCTYPE html>
-<html data-bs-theme="dark">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Twitch Pomo</title>
+<html>
 
-        <!-- Bootstrap 5.3 -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-        <!-- Loading.io -->
-        <link rel="stylesheet" type="text/css" href="loading-bar.min.css"/>
-    </head>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Pomo</title>
 
-    <style type="text/css">
-        .ldBar.label-center {
-            width: 100% !important;
-            height: 400px !important;
-            stroke-linecap: round;
-        }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap" rel="stylesheet">
+</head>
 
-        .ldBar-label {
-            color: rgba(0, 0, 0, 0);
-            text-shadow: none !important;
-        }
-    </style>
+<style>
+    body {
+        background-color: transparent;
+        margin: 0px;
+        padding: 0px;
+    }
 
-    <body class="p-3">
-        <div class="container-fluid">
-            <div id="progressBar"
-                 class="ldBar label-center" 
-                 data-stroke="red" 
-                 data-preset="circle" 
-                 data-value="0" 
-                 data-min="0" 
-                 data-max="100"
-                 data-duration="0.9"
-                 data-precision="0.0001">
-            </div>
-        </div>
+    .timer {
+        color: transparent;
+        font-family: 'Roboto', sans-serif;
+        font-size: xx-large;
+    }
 
-        <!-- Bootstrap 5.3 -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-        <!-- ComfyJS -->
-        <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
-        <!-- Loading.io -->
-        <script type="text/javascript" src="loading-bar.min.js"></script>
+    .box {
+        background-color: transparent;
+        padding: 15px;
+        display: inline-block;
+        border-radius: 12px;
+    }
+</style>
 
-        <!-- actual pomodoro timer logic -->
-        <script>
-            let progressBar = null;
-            
-            // we have to wait for the page to load otherwise the `.ldBar` property won't have been created yet
-            window.onload = () => {
-                progressBar = document.getElementById("progressBar").ldBar;
-                
-                // setInterval(() => {
-                //     progressBar.set(progressBar.value + 1.0);
-                // }, 1000);
+<body>
+    <div id="box" class="box">
+        <span id="timer" class="timer">00:00</span>
+    </div>
+
+    <!-- ComfyJS -->
+    <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+    <script src="config.js"></script>
+
+    <!-- moment.js -->
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+
+    <!-- actual pomodoro timer logic -->
+    <script>
+        // timer logic
+        let display = document.getElementById("timer");
+        let displayContainer = document.getElementById("box");
+        let timer = null;
+        let endTime = null;
+
+        const startTimer = (minutes) => {
+            endTime = moment().add({ minutes });
+            timer = setInterval(() => {
+                // calculate time remaining
+                let currentTime = moment();
+                let millisecondsRemaining = endTime.diff(currentTime);
+                let secondsRemaining = Math.ceil(millisecondsRemaining / 1000);
+
+                if (secondsRemaining > 0) {
+                    // determine display values
+                    let displayMinutes = Math.floor(secondsRemaining / 60);
+                    let displaySeconds = secondsRemaining % 60;
+
+                    display.textContent = `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
+                } else {
+                    resetTimer();
+                    var audio = new Audio('chime.mp3');
+                    audio.play();
+                }
+            }, 1000);
+
+            // make timer visible
+            display.style.color = '#02343F';
+            displayContainer.style.backgroundColor = '#F0EDCC'
+        };
+
+        const resetTimer = () => {
+            clearInterval(timer);
+            timer = null;
+            endTime = null;
+            display.textContent = '00:00';
+            display.style.color = 'transparent';
+            displayContainer.style.backgroundColor = 'transparent';
+        };
+
+        // twitch integration
+        ComfyJS.onCommand = (user, command, message, flags, extra) => {
+            if (flags.broadcaster && command === "timer") {
+                const minutes = parseInt(message);
+                if (!isNaN(minutes)) {
+                    startTimer(minutes);
+                } else {
+                    console.log("Message provided was not a number");
+                }
             }
-        </script>
-    </body>
+
+            if (flags.broadcaster && command === "tstop") {
+                resetTimer();
+            }
+        };
+
+        ComfyJS.Init(config.channel);
+    </script>
+</body>
+
 </html>
