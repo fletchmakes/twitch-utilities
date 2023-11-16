@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Broadcast</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap" rel="stylesheet">
+</head>
+
+<style>
+    body {
+        background-color: transparent;
+        margin: 0px;
+        padding: 0px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: fit-content;
+    }
+
+    .message {
+        color: #ADEFD1;
+        font-family: 'Roboto', sans-serif;
+        font-size: 5em;
+        text-align: center;
+    }
+
+    .box {
+        background-color: #00203F;
+        border-radius: 20px;
+        padding: 20px;
+        opacity: 0;
+
+        animation-duration: 1s;
+        animation-fill-mode: both;
+    }
+
+    .fadeInUp {
+        animation-name: fadeInUp
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+
+        to {
+            opacity: 1
+        }
+    }
+
+    .fadeOutDown {
+        animation-name: fadeOutDown
+    }
+
+    @keyframes fadeOutDown {
+        from {
+            opacity: 1
+        }
+
+        to {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+    }
+</style>
+
+<body>
+    <div id="box" class="box">
+        <span id="message" class="message">this is a test message</span>
+    </div>
+
+    <!-- ComfyJS -->
+    <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+    <script src="config.js"></script>
+
+    <!-- actual broadcast logic -->
+    <script>
+        // timer logic
+        let messageBox = document.getElementById("box");
+        let messageText = document.getElementById("message");
+
+        messageBox.style.backgroundColor = config.backgroundColor;
+        messageText.style.color = config.textColor;
+
+        const broadcastMessage = (message) => {
+            messageText.textContent = message;
+            messageBox.classList.remove("fadeOutDown");
+            messageBox.classList.add("fadeInUp");
+        }
+
+        const hideMessage = () => {
+            messageBox.classList.remove("fadeInUp");
+            messageBox.classList.add("fadeOutDown");
+        }
+
+        ComfyJS.onCommand = (user, command, message, flags, extra) => {
+            if (flags.broadcaster && command === "broadcast") {
+                broadcastMessage(message);
+                return;
+            }
+
+            if (flags.broadcaster && command === "broadcasthide") {
+                hideMessage();
+                return;
+            }
+        };
+
+        ComfyJS.Init(config.channel);
+    </script>
+</body>
+
+</html>
