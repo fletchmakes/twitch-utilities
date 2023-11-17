@@ -1,5 +1,5 @@
 var config = {
   channel: "fletchmakes",
-  textColor: "#ADEFD1",
-  backgroundColor: "#00203F"
+  textColor: "#FFF1E8",
+  backgroundColor: "#1D2B53"
 }

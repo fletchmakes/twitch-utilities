@@ -24,16 +24,46 @@
     }
 
     .timer {
-        color: transparent;
         font-family: 'Roboto', sans-serif;
         font-size: 5em;
         text-align: center;
     }
 
     .box {
-        background-color: transparent;
+        opacity: 0;
         border-radius: 20px;
         padding: 20px;
+
+        animation-duration: 1s;
+        animation-fill-mode: both;
+    }
+
+    .fadeIn {
+        animation-name: fadeIn
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0
+        }
+
+        to {
+            opacity: 1
+        }
+    }
+
+    .fadeOut {
+        animation-name: fadeOut
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1
+        }
+
+        to {
+            opacity: 0
+        }
     }
 </style>
 
@@ -57,7 +87,13 @@
         let timer = null;
         let endTime = null;
 
+        display.style.color = config.textColor;
+        displayContainer.style.backgroundColor = config.backgroundColor;
+
         const startTimer = (minutes) => {
+            displayContainer.classList.remove("fadeOut");
+            displayContainer.classList.add("fadeIn");
+            
             endTime = moment().add({ minutes });
             timer = setInterval(() => {
                 // calculate time remaining
@@ -77,10 +113,6 @@
                     audio.play();
                 }
             }, 1000);
-
-            // make timer visible
-            display.style.color = config.textColor;
-            displayContainer.style.backgroundColor = config.backgroundColor;
         };
 
         const resetTimer = () => {
@@ -88,13 +120,13 @@
             timer = null;
             endTime = null;
             display.textContent = '00:00';
-            display.style.color = 'transparent';
-            displayContainer.style.backgroundColor = 'transparent';
+            displayContainer.classList.remove("fadeIn");
+            displayContainer.classList.add("fadeOut");
         };
 
         // twitch integration
         ComfyJS.onCommand = (user, command, message, flags, extra) => {
-            if (flags.broadcaster && command === "timer") {
+            if (flags.broadcaster && command === "tstart") {
                 const minutes = parseInt(message);
                 if (!isNaN(minutes)) {
                     startTimer(minutes);
