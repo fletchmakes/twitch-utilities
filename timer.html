@@ -126,7 +126,7 @@
 
         // twitch integration
         ComfyJS.onCommand = (user, command, message, flags, extra) => {
-            if (flags.broadcaster && command === "tstart") {
+            if ((flags.broadcaster || flags.mod) && command === "tstart") {
                 const minutes = parseInt(message);
                 if (!isNaN(minutes)) {
                     startTimer(minutes);
@@ -135,7 +135,7 @@
                 }
             }
 
-            if (flags.broadcaster && command === "tstop") {
+            if ((flags.broadcaster || flags.mod) && command === "tstop") {
                 resetTimer();
             }
         };

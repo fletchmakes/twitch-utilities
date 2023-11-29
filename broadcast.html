@@ -102,12 +102,12 @@
         }
 
         ComfyJS.onCommand = (user, command, message, flags, extra) => {
-            if (flags.broadcaster && command === "bshow") {
+            if ((flags.broadcaster || flags.mod) && command === "bshow") {
                 broadcastMessage(message);
                 return;
             }
 
-            if (flags.broadcaster && command === "bhide") {
+            if ((flags.broadcaster || flags.mod) && command === "bhide") {
                 hideMessage();
                 return;
             }
