@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Pomo</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap" rel="stylesheet">
+</head>
+
+<style>
+    body {
+        background-color: transparent;
+        margin: 0px;
+        padding: 0px;
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        align-items: start;
+        height: 100vh;
+        max-width: 100vw;
+    }
+
+    .timer {
+        font-family: 'Roboto', sans-serif;
+        font-size: 3em;
+        text-align: left;
+        color: #1d1820;
+    }
+
+    .title {
+        font-family: 'Roboto', sans-serif;
+        font-size: 4em;
+        text-align: left;
+        color: #1d1820;
+    }
+
+    .task {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1.5em;
+        text-align: left;
+        color: #1d1820;
+    }
+
+    .box {
+        opacity: 100; /* TODO: switch back to 0 after edits */
+        border-radius: 15px;
+        padding: 15px;
+
+        animation-duration: 1s;
+        animation-fill-mode: both;
+        background-color: #d8a1ff;
+    }
+
+    .fadeIn {
+        animation-name: fadeIn
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0
+        }
+
+        to {
+            opacity: 1
+        }
+    }
+
+    .fadeOut {
+        animation-name: fadeOut
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1
+        }
+
+        to {
+            opacity: 0
+        }
+    }
+</style>
+
+<body>
+    <div id="box" class="box">
+        <div id="timer" class="timer">00:00</div>
+        <div id="title" class="title">Tasks:</div>
+        <div class="task">⭐ fletchmakes - create game mockup</div>
+        <div class="task">⭐ rikindled - update email template</div>
+    </div>
+
+    <!-- ComfyJS -->
+    <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+    <script src="config.js"></script>
+
+    <!-- actual pomodoro timer logic -->
+    <script>
+        // timer logic
+        let display = document.getElementById("timer");
+        let displayContainer = document.getElementById("box");
+        let title = document.getElementById("title");
+        let timer = null;
+        let secondsRemaining = 0;
+
+        const startTimer = (pomoWorkMinutes, pomoBreakMinutes) => {
+            displayContainer.classList.remove("fadeOut");
+            displayContainer.classList.add("fadeIn");
+            
+            secondsRemaining = pomoWorkMinutes * 60;
+            timer = setInterval(() => {
+                secondsRemaining -= 1;
+
+                if (secondsRemaining > 0) {
+                    // determine display values
+                    let displayMinutes = Math.floor(secondsRemaining / 60);
+                    let displaySeconds = secondsRemaining % 60;
+
+                    display.textContent = `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
+                } else {
+                    resetTimer();
+                    const audio = new Audio('chime.mp3');
+                    audio.play();
+                }
+            }, 1000);
+        };
+
+        const resetTimer = () => {
+            clearInterval(timer);
+            timer = null;
+            secondsRemaining = 0;
+            display.textContent = '00:00';
+            displayContainer.classList.remove("fadeIn");
+            displayContainer.classList.add("fadeOut");
+        };
+
+        // twitch integration
+        ComfyJS.onCommand = (user, command, message, flags, extra) => {
+            if ((flags.broadcaster || flags.mod) && command === "pomo") {
+                const inputs = message.split(" ");
+
+                if (inputs.length !== 2) {
+                    console.error("Message was not formatted properly");
+                    return;
+                }
+
+                const pomoWorkMinutes = parseInt(inputs[0]);
+                const pomoBreakMinutes = parseInt(inputs[1]);
+
+                if (!isNaN(pomoWorkMinutes) && !isNaN(pomoBreakMinutes)) {
+                    startTimer(pomoWorkMinutes, pomoBreakMinutes);
+                } else {
+                    console.error("Message was not formatted properly");
+                    return;
+                }
+            }
+
+            if ((flags.broadcaster || flags.mod) && command === "stop") {
+                resetTimer();
+            }
+        };
+
+        ComfyJS.Init(config.channel);
+    </script>
+</body>
+
+</html>
